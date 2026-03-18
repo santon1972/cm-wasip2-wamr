@@ -7055,7 +7055,7 @@ load(const uint8 *buf, uint32 size, WASMModule *module,
     module->package_version = version;
 
     if (!create_sections(buf, size, &section_list, error_buf, error_buf_size)
-        || !load_from_sections(module, section_list, true, wasm_binary_freeable,
+        || !load_from_sections(module, section_list, false, wasm_binary_freeable,
                                no_resolve, error_buf, error_buf_size)) {
         destroy_sections(section_list);
         return false;
@@ -7077,7 +7077,10 @@ check_wasi_abi_compatibility(const WASMModule *module,
 #if WASM_ENABLE_MULTI_MODULE != 0
                              bool main_module,
 #endif
-                             char *error_buf, uint32 error_buf_size)
+#if WASM_ENABLE_COMPONENT_MODEL != 0
+                            bool is_component,
+#endif
+                            char *error_buf, uint32 error_buf_size)
 {
     /**
      * be careful with:
@@ -7162,13 +7165,14 @@ check_wasi_abi_compatibility(const WASMModule *module,
     if (!module->import_wasi_api && !start && !initialize) {
         return true;
     }
-
+#if WASM_ENABLE_COMPONENT_MODEL != 0
     /* should have one at least */
     if (module->import_wasi_api && !start && !initialize) {
+        if (!is_component)
         LOG_WARNING("warning: a module with WASI apis should be either "
                     "a command or a reactor");
     }
-
+#endif
     /*
      * there is at least one of `_start` and `_initialize` in below cases.
      * according to the assumption, they should be all wasi compatible
@@ -7243,7 +7247,10 @@ wasm_loader_load(uint8 *buf, uint32 size,
 #if WASM_ENABLE_MULTI_MODULE != 0
                                       main_module,
 #endif
-                                      error_buf, error_buf_size)) {
+#if WASM_ENABLE_COMPONENT_MODEL != 0
+                                    args->is_component,
+#endif
+                                    error_buf, error_buf_size)) {
         goto fail;
     }
 #endif
