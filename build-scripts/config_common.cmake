@@ -123,7 +123,7 @@ if (WAMR_BUILD_JIT EQUAL 1)
     set (LLVM_DIR ${LLVM_BUILD_ROOT}/lib/cmake/llvm)
   endif ()
   find_package(LLVM REQUIRED CONFIG)
-  include_directories(${LLVM_INCLUDE_DIRS})
+  include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
   add_definitions(${LLVM_DEFINITIONS})
   message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
   message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -782,6 +782,11 @@ else()
   message ("     Component Model disabled")
   add_definitions(-DWASM_ENABLE_COMPONENT_MODEL=0)
 endif ()
+if (WAMR_BUILD_BRANCH_HINTS EQUAL 1)
+  message ("     Branch hints enabled")
+  add_definitions(-DWASM_ENABLE_BRANCH_HINTS=1)
+endif ()
+
 ########################################
 # Show Phase4 Wasm proposals status.
 ########################################
@@ -794,8 +799,8 @@ message (
 "       \"Non-trapping float-to-int Conversions\"\n"
 "       \"Sign-extension Operators\"\n"
 "       \"WebAssembly C and C++ API\"\n"
-"       \"Branch Hinting\"\n"
 "     Configurable. 0 is OFF. 1 is ON:\n"
+"       \"Branch Hinting\" via WAMR_BUILD_BRANCH_HINTS: ${WAMR_BUILD_BRANCH_HINTS}\n"
 "       \"Bulk Memory Operation\" via WAMR_BUILD_BULK_MEMORY: ${WAMR_BUILD_BULK_MEMORY}\n"
 "       \"Bulk-memory-opt\" via WAMR_BUILD_BULK_MEMORY_OPT: ${WAMR_BUILD_BULK_MEMORY_OPT}\n"
 "       \"Call-indirect-overlong\" via WAMR_BUILD_CALL_INDIRECT_OVERLONG: ${WAMR_BUILD_CALL_INDIRECT_OVERLONG}\n"
